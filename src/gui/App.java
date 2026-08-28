@@ -1,22 +1,27 @@
 package gui;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import java.awt.Font;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 
 public class App extends JFrame {
     public App() {
+        ImageIcon icon = new ImageIcon("src/assets/icon.png");
+
         setTitle("Expiry Finder");
+        setIconImage(icon.getImage());
         setSize(400, 300);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JLabel label = new JLabel("Welcome to Expiry Finder!", JLabel.CENTER);
-        label.setFont(new Font("MV Boli", Font.BOLD, 64));
-        label.setForeground(Color.green);
-        add(label);
+        LeftPanel leftPanel = new LeftPanel();
 
+        JPanel centrePanel = new JPanel();
+        centrePanel.setBackground(Color.BLACK);
+
+        add(leftPanel, BorderLayout.WEST);
+        add(centrePanel, BorderLayout.CENTER);
         setVisible(true);
     }
 }
