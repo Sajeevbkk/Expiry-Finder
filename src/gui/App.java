@@ -15,9 +15,9 @@ public class App extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        LeftPanel leftPanel = new LeftPanel();
+        LeftPanel leftPanel = new LeftPanel(); // This side panel contains Navigation
 
-        JPanel centrePanel = new JPanel();
+        JPanel centrePanel = new JPanel(); //TODO: Not Implemented
         centrePanel.setBackground(Color.BLACK);
 
         add(leftPanel, BorderLayout.WEST);
