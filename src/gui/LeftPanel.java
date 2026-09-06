@@ -11,7 +11,7 @@ class LeftPanel extends JPanel {
         /* ------------ Initial Configurations of LeftPanel -------------- */
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(300, 100));
-        setBackground(new Color(0xDAE9CA));
+        setBackground(new Color(0xF5F8F5));
 
         /* -------------- Components ------------------ */
         /* Top */
@@ -75,11 +75,14 @@ class NavBar extends JPanel {
         setBackground(new Color(0xDAE9CA));
         setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
-        addBtn = new JButton("Add Product");
+        addBtn = new RoundedButton("Add Product", 15, new Color(0xE4F1E8), new Color(0xD2E8D8));
         addBtn.setIcon(addIcon);
-        addBtn.setFocusPainted(false);
-        addBtn.setFont(new Font("Sans Serif", Font.BOLD, 25));
-        addBtn.setBackground(new Color(0xDAE9CA));
+        addBtn.setFont(new Font("Sans Serif", Font.BOLD, 16));
+        addBtn.setForeground(new Color(0x000000));
+        addBtn.setPreferredSize(new Dimension(240, 50));
+        addBtn.setHorizontalAlignment(SwingConstants.LEFT);
+        addBtn.setIconTextGap(20);
+        addBtn.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
         //TODO: Implement balance buttons
 

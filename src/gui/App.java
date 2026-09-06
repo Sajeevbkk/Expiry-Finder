@@ -7,6 +7,7 @@ public class App extends JFrame {
     public App() {
         ImageIcon icon = new ImageIcon("src/assets/icon.png");
 
+        /*---------------- Initial Configurations -----------------*/
         setTitle("Expiry Finder");
         setIconImage(icon.getImage());
         setSize(400, 300);
@@ -15,13 +16,13 @@ public class App extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        /*-----Components--------*/
         LeftPanel leftPanel = new LeftPanel(); // This side panel contains Navigation
+        JPanel mainPanel = new MainPanel();
 
-        JPanel centrePanel = new JPanel(); //TODO: Not Implemented
-        centrePanel.setBackground(Color.BLACK);
-
+        /*---------------- Final Configurations -----------------*/
         add(leftPanel, BorderLayout.WEST);
-        add(centrePanel, BorderLayout.CENTER);
+        add(mainPanel, BorderLayout.CENTER);
         setVisible(true);
     }
 }
