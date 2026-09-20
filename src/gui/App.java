@@ -11,7 +11,6 @@ public class App extends JFrame implements ViewNavigator {
     private final AddProductPanel addPanel;
     private final InventoryPanel inventoryPanel;
     private final ExpiryAlertsPanel expiryPanel;
-    private final BarcodeLookupPanel barcodePanel;
     private final CategoryPanel categoryPanel;
     private final AboutPanel aboutPanel;
 
@@ -19,12 +18,12 @@ public class App extends JFrame implements ViewNavigator {
         ImageIcon icon = new ImageIcon("src/assets/icon.png");
 
         /*---------------- Initial Configurations -----------------*/
-        setTitle("Expiry Finder - Smart Retail Inventory & Expiry Management");
+        setTitle("Expiry Finder - Smart Stock & Expiry Manager");
         if (icon.getImage() != null) {
             setIconImage(icon.getImage());
         }
-        setMinimumSize(new Dimension(1100, 720));
-        setSize(1280, 800);
+        setMinimumSize(new Dimension(1080, 700));
+        setSize(1240, 780);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -37,14 +36,12 @@ public class App extends JFrame implements ViewNavigator {
         addPanel = new AddProductPanel(this);
         inventoryPanel = new InventoryPanel(this);
         expiryPanel = new ExpiryAlertsPanel(this);
-        barcodePanel = new BarcodeLookupPanel(this);
         categoryPanel = new CategoryPanel(this);
         aboutPanel = new AboutPanel();
 
         cardContainer.add(addPanel, "ADD");
         cardContainer.add(inventoryPanel, "INVENTORY");
         cardContainer.add(expiryPanel, "EXPIRY");
-        cardContainer.add(barcodePanel, "BARCODE");
         cardContainer.add(categoryPanel, "CATEGORIES");
         cardContainer.add(aboutPanel, "ABOUT");
 
@@ -55,8 +52,8 @@ public class App extends JFrame implements ViewNavigator {
         add(leftPanel, BorderLayout.WEST);
         add(cardContainer, BorderLayout.CENTER);
 
-        // Start on Add Product view
-        navigateTo("ADD");
+        // Start on Inventory if stocks exist, else on Add Product
+        navigateTo("INVENTORY");
 
         setVisible(true);
     }
@@ -66,13 +63,10 @@ public class App extends JFrame implements ViewNavigator {
         cardLayout.show(cardContainer, viewName);
         leftPanel.setActiveView(viewName);
 
-        // Refresh dynamic view data on navigation
         if ("INVENTORY".equalsIgnoreCase(viewName)) {
             inventoryPanel.loadData();
         } else if ("EXPIRY".equalsIgnoreCase(viewName)) {
             expiryPanel.loadData();
-        } else if ("BARCODE".equalsIgnoreCase(viewName)) {
-            barcodePanel.loadSampleBarcodes();
         } else if ("ADD".equalsIgnoreCase(viewName)) {
             addPanel.loadCategories();
             addPanel.loadExistingProducts();
@@ -85,7 +79,6 @@ public class App extends JFrame implements ViewNavigator {
     public void refreshAll() {
         inventoryPanel.loadData();
         expiryPanel.loadData();
-        barcodePanel.loadSampleBarcodes();
         addPanel.loadCategories();
         addPanel.loadExistingProducts();
         categoryPanel.loadData();

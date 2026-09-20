@@ -1,9 +1,10 @@
 package gui;
 
 import database.Database;
-import gui.modified.RoundedButton;
-import gui.modified.RoundedPanel;
-import gui.modified.RoundedTextField;
+import gui.components.ModernButton;
+import gui.components.ModernCard;
+import gui.components.ModernTextField;
+import gui.components.VectorIcon;
 import model.Category;
 import model.StockItemDTO;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class InventoryPanel extends JPanel {
     private final ViewNavigator navigator;
 
-    private RoundedTextField searchField;
+    private ModernTextField searchField;
     private JComboBox<String> categoryFilterCombo;
     private JComboBox<String> statusFilterCombo;
 
@@ -29,42 +30,39 @@ public class InventoryPanel extends JPanel {
 
     public InventoryPanel(ViewNavigator navigator) {
         this.navigator = navigator;
-        setLayout(new BorderLayout(0, 15));
+        setLayout(new BorderLayout(0, 16));
         setBackground(UITheme.MAIN_BG);
-        setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+        setBorder(BorderFactory.createEmptyBorder(25, 40, 25, 40));
 
         initUI();
         loadData();
     }
 
     private void initUI() {
-        // --- Top Title & Control Area ---
-        JPanel topPanel = new JPanel(new BorderLayout(0, 15));
+        // --- Header & Filters ---
+        JPanel topPanel = new JPanel(new BorderLayout(0, 14));
         topPanel.setBackground(UITheme.MAIN_BG);
 
         // Title
         JPanel titleBox = new JPanel(new GridLayout(2, 1, 0, 4));
         titleBox.setBackground(UITheme.MAIN_BG);
-        JLabel titleLabel = new JLabel("Product & Stock Inventory");
+        JLabel titleLabel = new JLabel("Product Inventory");
         titleLabel.setFont(UITheme.FONT_TITLE);
-        titleLabel.setForeground(UITheme.TEXT_DARK);
+        titleLabel.setForeground(UITheme.TEXT_MAIN);
 
-        JLabel subtitleLabel = new JLabel("Track all product batches, adjust stock levels, and monitor expiration dates");
+        JLabel subtitleLabel = new JLabel("Browse all stock batches, monitor quantities, and stay ahead of expiration dates");
         subtitleLabel.setFont(UITheme.FONT_SUBTITLE);
         subtitleLabel.setForeground(UITheme.TEXT_MUTED);
 
         titleBox.add(titleLabel);
         titleBox.add(subtitleLabel);
 
-        // Filter Bar (Card)
-        RoundedPanel filterCard = new RoundedPanel(18, Color.WHITE);
-        filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 12));
+        // Filter Bar (Modern Card)
+        ModernCard filterCard = new ModernCard(18);
+        filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 12));
 
-        JLabel searchLbl = new JLabel("🔍 Search:");
-        searchLbl.setFont(UITheme.FONT_LABEL);
-        searchField = new RoundedTextField(12);
-        searchField.setPreferredSize(new Dimension(220, 36));
-        searchField.setFont(UITheme.FONT_REGULAR);
+        searchField = new ModernTextField("Search products or batch #...");
+        searchField.setPreferredSize(new Dimension(180, 40));
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -72,24 +70,20 @@ public class InventoryPanel extends JPanel {
             }
         });
 
-        JLabel catLbl = new JLabel("Category:");
-        catLbl.setFont(UITheme.FONT_LABEL);
         categoryFilterCombo = new JComboBox<>();
-        categoryFilterCombo.setPreferredSize(new Dimension(170, 36));
+        categoryFilterCombo.setPreferredSize(new Dimension(140, 40));
         categoryFilterCombo.setFont(UITheme.FONT_REGULAR);
+        categoryFilterCombo.setBackground(Color.WHITE);
         categoryFilterCombo.addActionListener(e -> applyFilters());
 
-        JLabel statusLbl = new JLabel("Status:");
-        statusLbl.setFont(UITheme.FONT_LABEL);
-        statusFilterCombo = new JComboBox<>(new String[]{"ALL", "EXPIRED", "7DAYS", "30DAYS", "GOOD"});
-        statusFilterCombo.setPreferredSize(new Dimension(140, 36));
+        statusFilterCombo = new JComboBox<>(new String[]{"All Statuses", "Expired Only", "Expiring < 7 Days", "Expiring < 30 Days", "Good"});
+        statusFilterCombo.setPreferredSize(new Dimension(140, 40));
         statusFilterCombo.setFont(UITheme.FONT_REGULAR);
+        statusFilterCombo.setBackground(Color.WHITE);
         statusFilterCombo.addActionListener(e -> applyFilters());
 
-        RoundedButton refreshBtn = new RoundedButton("↻ Refresh", 12, UITheme.PRIMARY_LIGHT, UITheme.PRIMARY_HOVER);
-        refreshBtn.setForeground(UITheme.PRIMARY_DARK);
-        refreshBtn.setFont(UITheme.FONT_BUTTON);
-        refreshBtn.setPreferredSize(new Dimension(100, 36));
+        ModernButton refreshBtn = new ModernButton("Refresh", new VectorIcon(VectorIcon.Type.REFRESH, 13), ModernButton.Variant.GHOST, 12);
+        refreshBtn.setPreferredSize(new Dimension(115, 40));
         refreshBtn.addActionListener(e -> {
             searchField.setText("");
             categoryFilterCombo.setSelectedIndex(0);
@@ -97,17 +91,12 @@ public class InventoryPanel extends JPanel {
             loadData();
         });
 
-        RoundedButton addBtn = new RoundedButton("➕ Add Stock", 12, UITheme.PRIMARY, UITheme.PRIMARY_DARK);
-        addBtn.setForeground(Color.WHITE);
-        addBtn.setFont(UITheme.FONT_BUTTON);
-        addBtn.setPreferredSize(new Dimension(120, 36));
+        ModernButton addBtn = new ModernButton("Add Stock", new VectorIcon(VectorIcon.Type.PLUS, 13), ModernButton.Variant.PRIMARY, 12);
+        addBtn.setPreferredSize(new Dimension(135, 40));
         addBtn.addActionListener(e -> navigator.navigateTo("ADD"));
 
-        filterCard.add(searchLbl);
         filterCard.add(searchField);
-        filterCard.add(catLbl);
         filterCard.add(categoryFilterCombo);
-        filterCard.add(statusLbl);
         filterCard.add(statusFilterCombo);
         filterCard.add(refreshBtn);
         filterCard.add(addBtn);
@@ -115,14 +104,15 @@ public class InventoryPanel extends JPanel {
         topPanel.add(titleBox, BorderLayout.NORTH);
         topPanel.add(filterCard, BorderLayout.CENTER);
 
-        // --- Data Table Card ---
-        RoundedPanel tableCard = new RoundedPanel(20, Color.WHITE);
-        tableCard.setLayout(new BorderLayout(0, 10));
-        tableCard.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        // --- Table Card ---
+        ModernCard tableCard = new ModernCard(20);
+        tableCard.setLayout(new BorderLayout(0, 12));
+        tableCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
 
+        // Note: ID column is intentionally completely removed for clean user experience!
         String[] columns = {
-                "Stock ID", "Product Name", "Category", "Barcode",
-                "Batch #", "Unit Price", "Quantity", "Arrival Date",
+                "Product Name", "Category", "Batch #",
+                "Unit Price", "Quantity", "Arrival Date",
                 "Expiry Date", "Days Left", "Status", "Total Value"
         };
 
@@ -136,27 +126,24 @@ public class InventoryPanel extends JPanel {
         inventoryTable = new JTable(tableModel);
         UITheme.styleTable(inventoryTable);
 
-        // Set column widths & renderers
-        inventoryTable.getColumnModel().getColumn(0).setPreferredWidth(60);   // ID
-        inventoryTable.getColumnModel().getColumn(1).setPreferredWidth(180);  // Name
-        inventoryTable.getColumnModel().getColumn(2).setPreferredWidth(120);  // Category
-        inventoryTable.getColumnModel().getColumn(3).setPreferredWidth(120);  // Barcode
-        inventoryTable.getColumnModel().getColumn(4).setPreferredWidth(70);   // Batch
-        inventoryTable.getColumnModel().getColumn(5).setPreferredWidth(80);   // Price
-        inventoryTable.getColumnModel().getColumn(6).setPreferredWidth(70);   // Qty
-        inventoryTable.getColumnModel().getColumn(7).setPreferredWidth(95);   // Arrival
-        inventoryTable.getColumnModel().getColumn(8).setPreferredWidth(95);   // Expiry
-        inventoryTable.getColumnModel().getColumn(9).setPreferredWidth(80);   // Days Left
-        inventoryTable.getColumnModel().getColumn(10).setPreferredWidth(120); // Status
-        inventoryTable.getColumnModel().getColumn(11).setPreferredWidth(90);  // Total Value
+        inventoryTable.getColumnModel().getColumn(0).setPreferredWidth(210); // Product Name
+        inventoryTable.getColumnModel().getColumn(1).setPreferredWidth(140); // Category
+        inventoryTable.getColumnModel().getColumn(2).setPreferredWidth(80);  // Batch #
+        inventoryTable.getColumnModel().getColumn(3).setPreferredWidth(85);  // Unit Price
+        inventoryTable.getColumnModel().getColumn(4).setPreferredWidth(80);  // Quantity
+        inventoryTable.getColumnModel().getColumn(5).setPreferredWidth(100); // Arrival Date
+        inventoryTable.getColumnModel().getColumn(6).setPreferredWidth(100); // Expiry Date
+        inventoryTable.getColumnModel().getColumn(7).setPreferredWidth(90);  // Days Left
+        inventoryTable.getColumnModel().getColumn(8).setPreferredWidth(135); // Status (Badge)
+        inventoryTable.getColumnModel().getColumn(9).setPreferredWidth(95);  // Total Value
 
-        inventoryTable.getColumnModel().getColumn(10).setCellRenderer(new StatusBadgeRenderer());
+        inventoryTable.getColumnModel().getColumn(8).setCellRenderer(new StatusBadgeRenderer());
 
         JScrollPane tableScroll = new JScrollPane(inventoryTable);
-        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(0xEAEAEA)));
+        tableScroll.setBorder(BorderFactory.createLineBorder(new Color(0xF1F5F9)));
         tableScroll.getViewport().setBackground(Color.WHITE);
 
-        // Bottom Action Controls
+        // Bottom Action Bar
         JPanel bottomBar = new JPanel(new BorderLayout());
         bottomBar.setOpaque(false);
 
@@ -167,16 +154,12 @@ public class InventoryPanel extends JPanel {
         JPanel actionBtnBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionBtnBox.setOpaque(false);
 
-        RoundedButton editQtyBtn = new RoundedButton("✏️ Edit Quantity", 12, new Color(0x3B82F6), new Color(0x2563EB));
-        editQtyBtn.setForeground(Color.WHITE);
-        editQtyBtn.setFont(UITheme.FONT_BUTTON);
-        editQtyBtn.setPreferredSize(new Dimension(140, 36));
+        ModernButton editQtyBtn = new ModernButton("Edit Quantity", new VectorIcon(VectorIcon.Type.EDIT, 13), ModernButton.Variant.OUTLINE, 12);
+        editQtyBtn.setPreferredSize(new Dimension(150, 38));
         editQtyBtn.addActionListener(e -> editSelectedQuantity());
 
-        RoundedButton deleteBtn = new RoundedButton("🗑️ Remove Batch", 12, new Color(0xEF4444), new Color(0xDC2626));
-        deleteBtn.setForeground(Color.WHITE);
-        deleteBtn.setFont(UITheme.FONT_BUTTON);
-        deleteBtn.setPreferredSize(new Dimension(140, 36));
+        ModernButton deleteBtn = new ModernButton("Remove Batch", new VectorIcon(VectorIcon.Type.TRASH, 13), ModernButton.Variant.DANGER_SOFT, 12);
+        deleteBtn.setPreferredSize(new Dimension(155, 38));
         deleteBtn.addActionListener(e -> deleteSelectedBatch());
 
         actionBtnBox.add(editQtyBtn);
@@ -208,14 +191,21 @@ public class InventoryPanel extends JPanel {
 
     public void applyFilters() {
         String keyword = searchField.getText().trim();
-        String selectedCatName = (String) categoryFilterCombo.getSelectedItem();
-        String statusFilter = (String) statusFilterCombo.getSelectedItem();
+        String selectedCat = (String) categoryFilterCombo.getSelectedItem();
+        int statusIndex = statusFilterCombo.getSelectedIndex();
+
+        String statusFilter = switch (statusIndex) {
+            case 1 -> "EXPIRED";
+            case 2 -> "7DAYS";
+            case 3 -> "30DAYS";
+            case 4 -> "GOOD";
+            default -> "ALL";
+        };
 
         Long categoryId = null;
-        if (selectedCatName != null && !selectedCatName.equals("All Categories")) {
-            List<Category> allCats = Database.getAllCategories();
-            for (Category c : allCats) {
-                if (c.getName().equalsIgnoreCase(selectedCatName)) {
+        if (selectedCat != null && !selectedCat.equals("All Categories")) {
+            for (Category c : Database.getAllCategories()) {
+                if (c.getName().equalsIgnoreCase(selectedCat)) {
                     categoryId = c.getId();
                     break;
                 }
@@ -236,52 +226,49 @@ public class InventoryPanel extends JPanel {
             String daysStr = days < 0 ? (Math.abs(days) + "d ago") : (days + "d");
 
             tableModel.addRow(new Object[]{
-                    item.getStockId(),
                     item.getProductName(),
                     item.getCategoryName(),
-                    item.getBarcode(),
-                    item.getBatchNo(),
-                    String.format("$%.2f", item.getPrice()),
-                    item.getQuantity(),
+                    "#" + item.getBatchNo(),
+                    UITheme.formatCurrency(item.getPrice()),
+                    item.getQuantity() + " pcs",
                     item.getArrivalDateFormatted(),
                     item.getExpiryDateFormatted(),
                     daysStr,
                     item.getStatus(),
-                    String.format("$%.2f", item.getTotalValue())
+                    UITheme.formatCurrency(item.getTotalValue())
             });
         }
 
-        summaryLabel.setText(String.format("Showing %d batches | %d total units | Total Inventory Value: $%.2f",
-                currentList.size(), totalUnits, totalValue));
+        summaryLabel.setText(String.format("Showing %d batches  •  %d total units in stock  •  Total Value: %s",
+                currentList.size(), totalUnits, UITheme.formatCurrency(totalValue)));
     }
 
     private void editSelectedQuantity() {
         int selectedRow = inventoryTable.getSelectedRow();
         if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Please select a stock batch from the table to edit.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a product batch from the table.", "Select Batch", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         StockItemDTO item = currentList.get(selectedRow);
         String input = JOptionPane.showInputDialog(this,
-                "Enter new quantity for: " + item.getProductName() + " (Batch #" + item.getBatchNo() + ")\nCurrent Quantity: " + item.getQuantity(),
+                "Enter updated quantity for " + item.getProductName() + " (Batch #" + item.getBatchNo() + "):",
                 item.getQuantity());
 
         if (input != null && !input.trim().isEmpty()) {
             try {
                 int newQty = Integer.parseInt(input.trim());
                 if (newQty < 0) {
-                    JOptionPane.showMessageDialog(this, "Quantity cannot be negative.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Quantity cannot be negative.", "Invalid Quantity", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if (Database.adjustStockQuantity(item.getStockId(), newQty)) {
-                    JOptionPane.showMessageDialog(this, "Quantity updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     navigator.refreshAll();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to update quantity.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Could not update quantity.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid integer quantity.", "Invalid Number", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please enter a valid number.", "Invalid Number", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -289,19 +276,18 @@ public class InventoryPanel extends JPanel {
     private void deleteSelectedBatch() {
         int selectedRow = inventoryTable.getSelectedRow();
         if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Please select a stock batch from the table to remove.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a product batch from the table to remove.", "Select Batch", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         StockItemDTO item = currentList.get(selectedRow);
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to remove Stock Batch #" + item.getBatchNo() + " for '" + item.getProductName() + "'?\n" +
-                        "Quantity: " + item.getQuantity() + " units (Value: $" + String.format("%.2f", item.getTotalValue()) + ")",
-                "Confirm Removal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Are you sure you want to remove Batch #" + item.getBatchNo() + " of " + item.getProductName() + "?\n" +
+                        "Quantity: " + item.getQuantity() + " units",
+                "Remove Batch", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             if (Database.deleteStock(item.getStockId())) {
-                JOptionPane.showMessageDialog(this, "Batch removed successfully.", "Removed", JOptionPane.INFORMATION_MESSAGE);
                 navigator.refreshAll();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to remove batch.", "Error", JOptionPane.ERROR_MESSAGE);

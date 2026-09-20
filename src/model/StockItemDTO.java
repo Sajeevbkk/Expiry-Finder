@@ -23,6 +23,12 @@ public class StockItemDTO {
     public StockItemDTO() {
     }
 
+    public StockItemDTO(long stockId, long productId, String productName,
+                        String categoryName, double price, int batchNo, int quantity,
+                        LocalDateTime arrivalDate, LocalDateTime expiryDate) {
+        this(stockId, productId, productName, "", categoryName, price, batchNo, quantity, arrivalDate, expiryDate);
+    }
+
     public StockItemDTO(long stockId, long productId, String productName, String barcode,
                         String categoryName, double price, int batchNo, int quantity,
                         LocalDateTime arrivalDate, LocalDateTime expiryDate) {
