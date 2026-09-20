@@ -1,6 +1,6 @@
 /* Written By Antigravity */
 
-package gui;
+package gui.modified;
 
 
 import javax.swing.*;

@@ -32,19 +32,12 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.45.1.0</version>
         </dependency>
-
-        <!-- SLF4J binding (simple) -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.36</version>
-        </dependency>
     </dependencies>
 
     <!-- Build configuration -->
     <build>
         <sourceDirectory>src</sourceDirectory>
-        <outputDirectory>bin</outputDirectory>
+        <outputDirectory>out</outputDirectory>
 
         <plugins>
             <!-- Compiler plugin -->

@@ -1,30 +1,17 @@
 package model;
 
-import java.time.LocalDate;
-
-public class Product {
-    private int id;
+class Product {
+    private long id;
     private String name;
-    private String barcode;
-    private LocalDate expiryDate;
+    private double price;
+    private long categoryID;
 
-    public Product() {
-    }
-
-    public Product(int id, String name, String barcode, LocalDate expiryDate) {
-        this.id = id;
+    public Product(String name, double price) {
         this.name = name;
-        this.barcode = barcode;
-        this.expiryDate = expiryDate;
+        this.price = price;
     }
 
-    public Product(String name, String barcode, LocalDate expiryDate) {
-        this.name = name;
-        this.barcode = barcode;
-        this.expiryDate = expiryDate;
-    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -40,19 +27,21 @@ public class Product {
         this.name = name;
     }
 
-    public String getBarcode() {
-        return barcode;
+    public double getPrice() {
+        return price;
     }
 
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
-    public LocalDate getExpiryDate() {
-        return expiryDate;
+    public long getCategoryID() {
+        return categoryID;
     }
 
-    public void setExpiryDate(LocalDate expiryDate) {
-        this.expiryDate = expiryDate;
+    public void setCategoryID(long categoryID) {
+        this.categoryID = categoryID;
     }
+
+
 }

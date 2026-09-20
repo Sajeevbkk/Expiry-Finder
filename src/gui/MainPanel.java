@@ -1,5 +1,9 @@
 package gui;
 
+import gui.modified.RoundedButton;
+import gui.modified.RoundedPanel;
+import gui.modified.RoundedTextField;
+
 import javax.swing.*;
 import java.awt.*;
 
