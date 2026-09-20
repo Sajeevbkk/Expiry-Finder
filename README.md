@@ -10,9 +10,10 @@ A simple Java application to help shops manage product expiry dates.
    ```bash
    cd Expiry-Finder
    ```
-3. Run the application
+3. Run the application (_Expecting Maven Already Installed_)
 4. ```bash
-   java src/Main.java
+   mvn clean compile
+   mvn exec:java
    ```
 
 > Have a Nice Day 😊

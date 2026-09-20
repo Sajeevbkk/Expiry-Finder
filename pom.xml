@@ -37,6 +37,7 @@
     <!-- Build configuration -->
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>test</testSourceDirectory>
         <outputDirectory>out</outputDirectory>
 
         <plugins>
