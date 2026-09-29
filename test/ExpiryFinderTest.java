@@ -51,23 +51,22 @@ public class ExpiryFinderTest {
         Category cat = Database.findOrCreateCategory("Test Category");
         assertNotNull(cat);
 
-        String barcode = "TEST_EAN_" + System.currentTimeMillis();
-        Product product = new Product("Test Organic Milk", barcode, 4.25, cat.getId());
+        Product product = new Product("Test Organic Milk", 4.25, cat.getId());
 
         // Insert product
         assertTrue("Insert product should succeed", Database.insertProduct(product));
         assertTrue("Product ID should be generated", product.getId() > 0);
 
-        // Lookup by barcode
-        Product byBarcode = Database.getProductByBarcode(barcode);
-        assertNotNull("Product should be found by barcode", byBarcode);
-        assertEquals(product.getName(), byBarcode.getName());
-        assertEquals(4.25, byBarcode.getPrice(), 0.001);
+        // Lookup by ID
+        Product byId = Database.getProductById(product.getId());
+        assertNotNull("Product should be found by ID", byId);
+        assertEquals(product.getName(), byId.getName());
+        assertEquals(4.25, byId.getPrice(), 0.001);
 
         // Update product
-        byBarcode.setName("Test Organic Whole Milk 1L");
-        byBarcode.setPrice(4.50);
-        assertTrue("Update product should succeed", Database.updateProduct(byBarcode));
+        byId.setName("Test Organic Whole Milk 1L");
+        byId.setPrice(4.50);
+        assertTrue("Update product should succeed", Database.updateProduct(byId));
 
         Product updated = Database.getProductById(product.getId());
         assertEquals("Test Organic Whole Milk 1L", updated.getName());
@@ -81,7 +80,7 @@ public class ExpiryFinderTest {
     @Test
     public void testStockAndExpiryCalculations() {
         Category cat = Database.findOrCreateCategory("Dairy & Eggs");
-        Product product = new Product("Greek Yogurt 500g", "BC_" + System.currentTimeMillis(), 3.20, cat.getId());
+        Product product = new Product("Greek Yogurt 500g", 3.20, cat.getId());
         assertTrue(Database.insertProduct(product));
 
         LocalDate today = LocalDate.now();

@@ -46,7 +46,6 @@ public class Database {
         String productsSql = "CREATE TABLE IF NOT EXISTS products (" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "    name TEXT NOT NULL," +
-                "    barcode TEXT," +
                 "    price REAL NOT NULL," +
                 "    category_id INTEGER," +
                 "    FOREIGN KEY (category_id) REFERENCES categories(id)" +
@@ -74,53 +73,12 @@ public class Database {
                     stmt.execute(stockSql);
                 }
 
-                // Check if barcode column exists in products (schema migration safety)
-                try (ResultSet rs = conn.getMetaData().getColumns(null, null, "products", "barcode")) {
-                    if (!rs.next()) {
-                        try (Statement alterStmt = conn.createStatement()) {
-                            alterStmt.execute("ALTER TABLE products ADD COLUMN barcode TEXT;");
-                        }
-                    }
-                }
-
-                // Seed default categories if table is empty
-                seedDefaultCategories(conn);
-
                 System.out.println("Database connection established and tables initialized successfully.");
             } else {
                 System.err.println("Connection failed. Database not found.");
             }
         } catch (SQLException e) {
             System.err.println("Error initializing database: " + e.getMessage());
-        }
-    }
-
-    private static void seedDefaultCategories(Connection conn) {
-        String countSql = "SELECT COUNT(*) FROM categories";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(countSql)) {
-            if (rs.next() && rs.getInt(1) == 0) {
-                String[] defaults = {
-                        "Dairy & Eggs",
-                        "Bakery & Bread",
-                        "Beverages & Drinks",
-                        "Snacks & Sweets",
-                        "Canned & Packaged Foods",
-                        "Fresh Produce & Fruits",
-                        "Meat & Seafood",
-                        "Personal Care & Medicine"
-                };
-                String insertSql = "INSERT INTO categories (name) VALUES (?)";
-                try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
-                    for (String cat : defaults) {
-                        pstmt.setString(1, cat);
-                        pstmt.addBatch();
-                    }
-                    pstmt.executeBatch();
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Note: Default categories check/seed: " + e.getMessage());
         }
     }
 
@@ -234,16 +192,15 @@ public class Database {
     // ==========================================
 
     public static boolean insertProduct(Product product) {
-        String sql = "INSERT INTO products (name, barcode, price, category_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO products (name, price, category_id) VALUES (?, ?, ?)";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, product.getName());
-            pstmt.setString(2, product.getBarcode());
-            pstmt.setDouble(3, product.getPrice());
+            pstmt.setDouble(2, product.getPrice());
             if (product.getCategoryID() > 0) {
-                pstmt.setLong(4, product.getCategoryID());
+                pstmt.setLong(3, product.getCategoryID());
             } else {
-                pstmt.setNull(4, Types.INTEGER);
+                pstmt.setNull(3, Types.INTEGER);
             }
 
             int affected = pstmt.executeUpdate();
@@ -262,18 +219,17 @@ public class Database {
     }
 
     public static boolean updateProduct(Product product) {
-        String sql = "UPDATE products SET name = ?, barcode = ?, price = ?, category_id = ? WHERE id = ?";
+        String sql = "UPDATE products SET name = ?, price = ?, category_id = ? WHERE id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, product.getName());
-            pstmt.setString(2, product.getBarcode());
-            pstmt.setDouble(3, product.getPrice());
+            pstmt.setDouble(2, product.getPrice());
             if (product.getCategoryID() > 0) {
-                pstmt.setLong(4, product.getCategoryID());
+                pstmt.setLong(3, product.getCategoryID());
             } else {
-                pstmt.setNull(4, Types.INTEGER);
+                pstmt.setNull(3, Types.INTEGER);
             }
-            pstmt.setLong(5, product.getId());
+            pstmt.setLong(4, product.getId());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error updating product: " + e.getMessage());
@@ -307,7 +263,7 @@ public class Database {
     }
 
     public static Product getProductById(long id) {
-        String sql = "SELECT p.id, p.name, p.barcode, p.price, p.category_id, c.name AS category_name " +
+        String sql = "SELECT p.id, p.name, p.price, p.category_id, c.name AS category_name " +
                 "FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -315,7 +271,7 @@ public class Database {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Product p = new Product(rs.getLong("id"), rs.getString("name"),
-                            rs.getString("barcode"), rs.getDouble("price"), rs.getLong("category_id"));
+                            rs.getDouble("price"), rs.getLong("category_id"));
                     p.setCategoryName(rs.getString("category_name"));
                     return p;
                 }
@@ -326,39 +282,16 @@ public class Database {
         return null;
     }
 
-    public static Product getProductByBarcode(String barcode) {
-        if (barcode == null || barcode.trim().isEmpty()) {
-            return null;
-        }
-        String sql = "SELECT p.id, p.name, p.barcode, p.price, p.category_id, c.name AS category_name " +
-                "FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE TRIM(p.barcode) = TRIM(?)";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, barcode.trim());
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    Product p = new Product(rs.getLong("id"), rs.getString("name"),
-                            rs.getString("barcode"), rs.getDouble("price"), rs.getLong("category_id"));
-                    p.setCategoryName(rs.getString("category_name"));
-                    return p;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error fetching product by barcode: " + e.getMessage());
-        }
-        return null;
-    }
-
     public static List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT p.id, p.name, p.barcode, p.price, p.category_id, c.name AS category_name " +
+        String sql = "SELECT p.id, p.name, p.price, p.category_id, c.name AS category_name " +
                 "FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.name ASC";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 Product p = new Product(rs.getLong("id"), rs.getString("name"),
-                        rs.getString("barcode"), rs.getDouble("price"), rs.getLong("category_id"));
+                        rs.getDouble("price"), rs.getLong("category_id"));
                 p.setCategoryName(rs.getString("category_name"));
                 list.add(p);
             }
@@ -516,7 +449,7 @@ public class Database {
     public static List<StockItemDTO> searchStockItems(String keyword, Long categoryId, String statusFilter) {
         List<StockItemDTO> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT s.id AS stock_id, s.product_id, p.name AS product_name, p.barcode, " +
+                "SELECT s.id AS stock_id, s.product_id, p.name AS product_name, " +
                 "c.name AS category_name, p.price, s.batchno, s.quantity, " +
                 "s.arrival_date, s.expiry_date " +
                 "FROM stock s " +
@@ -528,9 +461,8 @@ public class Database {
         List<Object> params = new ArrayList<>();
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append("AND (LOWER(p.name) LIKE ? OR LOWER(p.barcode) LIKE ? OR CAST(s.batchno AS TEXT) LIKE ?) ");
+            sql.append("AND (LOWER(p.name) LIKE ? OR CAST(s.batchno AS TEXT) LIKE ?) ");
             String term = "%" + keyword.trim().toLowerCase() + "%";
-            params.add(term);
             params.add(term);
             params.add(term);
         }
@@ -554,7 +486,6 @@ public class Database {
                     long stockId = rs.getLong("stock_id");
                     long productId = rs.getLong("product_id");
                     String productName = rs.getString("product_name");
-                    String barcode = rs.getString("barcode");
                     String categoryName = rs.getString("category_name");
                     double price = rs.getDouble("price");
                     int batchNo = rs.getInt("batchno");
@@ -562,7 +493,7 @@ public class Database {
                     LocalDateTime arrivalDate = Stock.parseDateTime(rs.getString("arrival_date"));
                     LocalDateTime expiryDate = Stock.parseDateTime(rs.getString("expiry_date"));
 
-                    StockItemDTO dto = new StockItemDTO(stockId, productId, productName, barcode,
+                    StockItemDTO dto = new StockItemDTO(stockId, productId, productName,
                             categoryName, price, batchNo, quantity, arrivalDate, expiryDate);
 
                     if (statusFilter != null && !statusFilter.equalsIgnoreCase("ALL")) {

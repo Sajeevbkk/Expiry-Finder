@@ -12,7 +12,6 @@ public class StockItemDTO {
     private long stockId;
     private long productId;
     private String productName;
-    private String barcode;
     private String categoryName;
     private double price;
     private int batchNo;
@@ -26,16 +25,9 @@ public class StockItemDTO {
     public StockItemDTO(long stockId, long productId, String productName,
                         String categoryName, double price, int batchNo, int quantity,
                         LocalDateTime arrivalDate, LocalDateTime expiryDate) {
-        this(stockId, productId, productName, "", categoryName, price, batchNo, quantity, arrivalDate, expiryDate);
-    }
-
-    public StockItemDTO(long stockId, long productId, String productName, String barcode,
-                        String categoryName, double price, int batchNo, int quantity,
-                        LocalDateTime arrivalDate, LocalDateTime expiryDate) {
         this.stockId = stockId;
         this.productId = productId;
         this.productName = productName;
-        this.barcode = barcode;
         this.categoryName = categoryName;
         this.price = price;
         this.batchNo = batchNo;
@@ -66,14 +58,6 @@ public class StockItemDTO {
 
     public void setProductName(String productName) {
         this.productName = productName;
-    }
-
-    public String getBarcode() {
-        return barcode != null ? barcode : "-";
-    }
-
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
     }
 
     public String getCategoryName() {

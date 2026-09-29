@@ -45,7 +45,6 @@ public class App extends JFrame implements ViewNavigator {
         cardContainer.add(categoryPanel, "CATEGORIES");
         cardContainer.add(aboutPanel, "ABOUT");
 
-        /*---------------- Navigation Panel -----------------*/
         leftPanel = new LeftPanel(this);
 
         /*---------------- Final Assembly -----------------*/

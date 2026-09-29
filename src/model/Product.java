@@ -5,7 +5,6 @@ import java.util.Objects;
 public class Product {
     private long id;
     private String name;
-    private String barcode;
     private double price;
     private long categoryID;
     private String categoryName;
@@ -18,17 +17,15 @@ public class Product {
         this.price = price;
     }
 
-    public Product(String name, String barcode, double price, long categoryID) {
+    public Product(String name, double price, long categoryID) {
         this.name = name;
-        this.barcode = barcode;
         this.price = price;
         this.categoryID = categoryID;
     }
 
-    public Product(long id, String name, String barcode, double price, long categoryID) {
+    public Product(long id, String name, double price, long categoryID) {
         this.id = id;
         this.name = name;
-        this.barcode = barcode;
         this.price = price;
         this.categoryID = categoryID;
     }
@@ -47,14 +44,6 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getBarcode() {
-        return barcode;
-    }
-
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
     }
 
     public double getPrice() {
@@ -86,16 +75,16 @@ public class Product {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return id == product.id && Double.compare(product.price, price) == 0 && categoryID == product.categoryID && Objects.equals(name, product.name) && Objects.equals(barcode, product.barcode);
+        return id == product.id && Double.compare(product.price, price) == 0 && categoryID == product.categoryID && Objects.equals(name, product.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, barcode, price, categoryID);
+        return Objects.hash(id, name, price, categoryID);
     }
 
     @Override
     public String toString() {
-        return name + (barcode != null && !barcode.isEmpty() ? " [" + barcode + "]" : "");
+        return name + " (ID: " + id + ", Price: " + price + ", Category ID: " + categoryID + ")";
     }
 }

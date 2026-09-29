@@ -428,7 +428,7 @@ public class AddProductPanel extends JPanel {
             }
             productId = selected.getId();
         } else {
-            Product newProd = new Product(name, "", price, categoryId);
+            Product newProd = new Product(name, price, categoryId);
             if (!Database.insertProduct(newProd)) {
                 showError("Could not save product.");
                 return;
