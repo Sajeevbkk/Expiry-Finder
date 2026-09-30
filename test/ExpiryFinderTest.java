@@ -128,6 +128,12 @@ public class ExpiryFinderTest {
         assertNotNull(safeDTO);
         assertEquals("GOOD", safeDTO.getStatus());
 
+        // Verify date formatting for user display (dd-MM-yyyy)
+        assertTrue("Arrival date should be formatted as dd-MM-yyyy",
+                expiredDTO.getArrivalDateFormatted().matches("^\\d{2}-\\d{2}-\\d{4}$"));
+        assertTrue("Expiry date should be formatted as dd-MM-yyyy",
+                expiredDTO.getExpiryDateFormatted().matches("^\\d{2}-\\d{2}-\\d{4}$"));
+
         // Test adjustStockQuantity
         assertTrue(Database.adjustStockQuantity(criticalStock.getId(), 12));
         Stock reloadedCritical = Stock.load(criticalStock.getId());
@@ -158,6 +164,27 @@ public class ExpiryFinderTest {
         assertEquals(15, dt1.getDayOfMonth());
         assertEquals(0, dt1.getHour());
 
+        // Test user format: dd-MM-yyyy
+        LocalDateTime dtUser = Stock.parseDateTime("15-10-2026");
+        assertNotNull(dtUser);
+        assertEquals(2026, dtUser.getYear());
+        assertEquals(10, dtUser.getMonthValue());
+        assertEquals(15, dtUser.getDayOfMonth());
+
+        // Test user format with single digit day/month: d-M-yyyy
+        LocalDateTime dtUserSingle = Stock.parseDateTime("5-9-2026");
+        assertNotNull(dtUserSingle);
+        assertEquals(2026, dtUserSingle.getYear());
+        assertEquals(9, dtUserSingle.getMonthValue());
+        assertEquals(5, dtUserSingle.getDayOfMonth());
+
+        // Test user format with slashes: dd/MM/yyyy
+        LocalDateTime dtSlashes = Stock.parseDateTime("25/12/2026");
+        assertNotNull(dtSlashes);
+        assertEquals(2026, dtSlashes.getYear());
+        assertEquals(12, dtSlashes.getMonthValue());
+        assertEquals(25, dtSlashes.getDayOfMonth());
+
         LocalDateTime dt2 = Stock.parseDateTime("2026-12-31 23:59:59");
         assertNotNull(dt2);
         assertEquals(23, dt2.getHour());
@@ -171,5 +198,55 @@ public class ExpiryFinderTest {
         assertNull(Stock.parseDateTime(null));
         assertNull(Stock.parseDateTime(""));
         assertNull(Stock.parseDateTime("invalid-date-format"));
+    }
+
+    @Test
+    public void testDateFormattingAndDatabaseStorageWithoutTime() throws Exception {
+        Category cat = Database.findOrCreateCategory("Test Date Department");
+        Product prod = new Product("Date Test Item", 99.0, cat.getId());
+        assertTrue(Database.insertProduct(prod));
+
+        // Create stock with user format: dd-MM-yyyy
+        Stock stock = new Stock(prod.getId(), 888, 10, "15-08-2026", "20-11-2026");
+        assertTrue(stock.save());
+        assertTrue(stock.getId() > 0);
+
+        // 1. Verify that dates stored in the database have NO time component (exact YYYY-MM-DD)
+        try (java.sql.Connection conn = Database.connect();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement("SELECT arrival_date, expiry_date FROM stock WHERE id = ?")) {
+            pstmt.setLong(1, stock.getId());
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                assertTrue(rs.next());
+                String rawArrival = rs.getString("arrival_date");
+                String rawExpiry = rs.getString("expiry_date");
+
+                assertEquals("Raw arrival_date in DB must be YYYY-MM-DD without time", "2026-08-15", rawArrival);
+                assertEquals("Raw expiry_date in DB must be YYYY-MM-DD without time", "2026-11-20", rawExpiry);
+
+                assertFalse("arrival_date in DB must not contain time indicator 'T'", rawArrival.contains("T"));
+                assertFalse("arrival_date in DB must not contain spaces or time", rawArrival.contains(" "));
+                assertFalse("arrival_date in DB must not contain colons", rawArrival.contains(":"));
+
+                assertFalse("expiry_date in DB must not contain time indicator 'T'", rawExpiry.contains("T"));
+                assertFalse("expiry_date in DB must not contain spaces or time", rawExpiry.contains(" "));
+                assertFalse("expiry_date in DB must not contain colons", rawExpiry.contains(":"));
+
+                assertEquals(10, rawArrival.length());
+                assertEquals(10, rawExpiry.length());
+            }
+        }
+
+        // 2. Verify that dates displayed to user are formatted as dd-MM-yyyy
+        List<StockItemDTO> items = Database.searchStockItems("Date Test Item", null, "ALL");
+        assertFalse(items.isEmpty());
+        StockItemDTO dto = items.get(0);
+
+        assertEquals("Arrival date shown to user must be dd-MM-yyyy", "15-08-2026", dto.getArrivalDateFormatted());
+        assertEquals("Expiry date shown to user must be dd-MM-yyyy", "20-11-2026", dto.getExpiryDateFormatted());
+
+        // Clean up
+        stock.delete();
+        Database.deleteProduct(prod.getId());
+        Database.deleteCategory(cat.getId());
     }
 }

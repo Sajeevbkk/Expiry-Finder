@@ -234,7 +234,7 @@ public class ExpiryAlertsPanel extends JPanel {
         sb.append("====================================================\n");
         sb.append("          EXPIRY FINDER - SHELF CHECKLIST           \n");
         sb.append("====================================================\n");
-        sb.append(String.format("Generated: %s | Total Items: %d\n\n", java.time.LocalDate.now(), currentList.size()));
+        sb.append(String.format("Generated: %s | Total Items: %d\n\n", UITheme.formatDate(java.time.LocalDate.now()), currentList.size()));
 
         for (StockItemDTO item : currentList) {
             sb.append(String.format("• %s\n", item.getProductName()));

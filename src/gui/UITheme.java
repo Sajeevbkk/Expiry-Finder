@@ -60,6 +60,19 @@ public class UITheme {
         return String.format("₹%.2f", amount);
     }
 
+    // Date Formatting (dd-MM-yyyy for all user displays)
+    public static final java.time.format.DateTimeFormatter DATE_FORMATTER = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+    public static String formatDate(java.time.LocalDate date) {
+        if (date == null) return "-";
+        return date.format(DATE_FORMATTER);
+    }
+
+    public static String formatDate(java.time.LocalDateTime dateTime) {
+        if (dateTime == null) return "-";
+        return dateTime.format(DATE_FORMATTER);
+    }
+
     public static void styleTable(JTable table) {
         table.setFont(FONT_REGULAR);
         table.setRowHeight(44);

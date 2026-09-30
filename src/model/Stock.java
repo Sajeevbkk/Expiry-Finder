@@ -69,12 +69,16 @@ public class Stock {
 
     // --- Date/Time Parsing and Formatting Helpers ---
 
+    public static final DateTimeFormatter DB_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter USER_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
     /**
      * Parses a date or date-time string into a LocalDateTime.
      * Supports:
-     * - ISO date: "YYYY-MM-DD" (converted to start of day)
-     * - ISO date-time: "YYYY-MM-DDTHH:mm[:ss[.SSS]]"
-     * - Space-separated date-time: "YYYY-MM-DD HH:mm[:ss]"
+     * - User date: "dd-MM-yyyy" or "d-M-yyyy", with hyphens or slashes
+     * - ISO date: "yyyy-MM-dd" or "yyyy-M-d", with hyphens or slashes
+     * - ISO date-time: "yyyy-MM-ddTHH:mm[:ss[.SSS]]"
+     * - Space-separated date-time: "yyyy-MM-dd HH:mm[:ss]"
      */
     public static LocalDateTime parseDateTime(String dateStr) {
         if (dateStr == null || dateStr.trim().isEmpty()) {
@@ -82,9 +86,28 @@ public class Stock {
         }
         dateStr = dateStr.trim();
         try {
-            if (dateStr.length() == 10) {
-                return LocalDate.parse(dateStr).atStartOfDay();
+            // User format: dd-MM-yyyy (e.g. 30-09-2026 or 5-9-2026)
+            if (dateStr.matches("^\\d{1,2}-\\d{1,2}-\\d{4}$")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d-M-yyyy");
+                return LocalDate.parse(dateStr, dtf).atStartOfDay();
             }
+            // User format with slashes: dd/MM/yyyy (e.g. 30/09/2026)
+            if (dateStr.matches("^\\d{1,2}/\\d{1,2}/\\d{4}$")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d/M/yyyy");
+                return LocalDate.parse(dateStr, dtf).atStartOfDay();
+            }
+            // ISO date format: yyyy-MM-dd
+            if (dateStr.matches("^\\d{4}-\\d{1,2}-\\d{1,2}$")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-M-d");
+                return LocalDate.parse(dateStr, dtf).atStartOfDay();
+            }
+            // ISO date format with slashes: yyyy/MM/dd
+            if (dateStr.matches("^\\d{4}/\\d{1,2}/\\d{1,2}$")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/M/d");
+                return LocalDate.parse(dateStr, dtf).atStartOfDay();
+            }
+
+            // ISO date-time or space-separated date-time
             if (dateStr.contains(" ") && !dateStr.contains("T")) {
                 dateStr = dateStr.replace(" ", "T");
             }
@@ -95,22 +118,76 @@ public class Stock {
         }
     }
 
-    public static String formatDateTime(LocalDateTime dateTime) {
+    /**
+     * Formats a date for database storage without time (yyyy-MM-dd).
+     */
+    public static String formatDateForDb(LocalDateTime dateTime) {
         if (dateTime == null) {
             return null;
         }
-        return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return dateTime.toLocalDate().format(DB_DATE_FORMATTER);
     }
 
+    public static String formatDateForDb(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return date.format(DB_DATE_FORMATTER);
+    }
+
+    /**
+     * Formats a date for user display in dd-MM-yyyy format.
+     */
+    public static String formatDateForUser(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "";
+        }
+        return dateTime.toLocalDate().format(USER_DATE_FORMATTER);
+    }
+
+    public static String formatDateForUser(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        return date.format(USER_DATE_FORMATTER);
+    }
+
+    /**
+     * Legacy helper: formats without time for database storage (yyyy-MM-dd).
+     */
+    public static String formatDateTime(LocalDateTime dateTime) {
+        return formatDateForDb(dateTime);
+    }
+
+    /**
+     * Returns the arrival date formatted for database storage without time (yyyy-MM-dd).
+     */
     public String getArrivalDateString() {
         if (arrivalDate == null) {
             arrivalDate = LocalDateTime.now();
         }
-        return formatDateTime(arrivalDate);
+        return formatDateForDb(arrivalDate);
     }
 
+    /**
+     * Returns the expiry date formatted for database storage without time (yyyy-MM-dd).
+     */
     public String getExpiryDateString() {
-        return formatDateTime(expiryDate);
+        return formatDateForDb(expiryDate);
+    }
+
+    /**
+     * Returns the arrival date formatted for user display (dd-MM-yyyy).
+     */
+    public String getArrivalDateFormatted() {
+        return formatDateForUser(arrivalDate);
+    }
+
+    /**
+     * Returns the expiry date formatted for user display (dd-MM-yyyy).
+     */
+    public String getExpiryDateFormatted() {
+        return formatDateForUser(expiryDate);
     }
 
     public String getArrivalDateFormatted(String pattern) {

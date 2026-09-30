@@ -12,6 +12,8 @@ import model.Stock;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AddProductPanel extends JPanel {
@@ -168,16 +170,16 @@ public class AddProductPanel extends JPanel {
 
         // Row 7: Arrival Date & Expiry Date
         gbc.gridx = 0; gbc.gridy = row; gbc.weightx = 0.5;
-        arrivalDateField = new ModernTextField("YYYY-MM-DD");
-        formCard.add(createFieldBlock("Arrival Date", arrivalDateField), gbc);
+        arrivalDateField = new ModernTextField("DD-MM-YYYY");
+        formCard.add(createFieldBlock("Arrival Date (DD-MM-YYYY)", arrivalDateField), gbc);
 
         gbc.gridx = 1; gbc.gridy = row++; gbc.weightx = 0.5;
         JPanel expiryBlock = new JPanel(new BorderLayout(0, 6));
         expiryBlock.setOpaque(false);
-        JLabel expLbl = new JLabel("Expiry Date (YYYY-MM-DD)");
+        JLabel expLbl = new JLabel("Expiry Date (DD-MM-YYYY)");
         expLbl.setFont(UITheme.FONT_LABEL);
         expLbl.setForeground(UITheme.TEXT_MAIN);
-        expiryDateField = new ModernTextField("Select or type expiry date");
+        expiryDateField = new ModernTextField("DD-MM-YYYY");
         expiryDateField.setPreferredSize(new Dimension(0, 42));
 
         // Modern Quick date shortcuts
@@ -306,7 +308,7 @@ public class AddProductPanel extends JPanel {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createLineBorder(UITheme.PRIMARY_BORDER, 1));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(e -> expiryDateField.setText(LocalDate.now().plusDays(days).toString()));
+        btn.addActionListener(e -> expiryDateField.setText(LocalDate.now().plusDays(days).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
         return btn;
     }
 
@@ -350,20 +352,22 @@ public class AddProductPanel extends JPanel {
     }
 
     private void resetFormDefaults() {
-        arrivalDateField.setText(LocalDate.now().toString());
-        expiryDateField.setText(LocalDate.now().plusMonths(3).toString());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        arrivalDateField.setText(LocalDate.now().format(dtf));
+        expiryDateField.setText(LocalDate.now().plusMonths(3).format(dtf));
         batchField.setText(String.valueOf((int) (System.currentTimeMillis() % 100000)));
         quantityField.setText("20");
         priceField.setText("2.99");
     }
 
     private void clearForm() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         nameField.setText("");
         priceField.setText("2.99");
         batchField.setText(String.valueOf((int) (System.currentTimeMillis() % 100000)));
         quantityField.setText("20");
-        arrivalDateField.setText(LocalDate.now().toString());
-        expiryDateField.setText(LocalDate.now().plusMonths(3).toString());
+        arrivalDateField.setText(LocalDate.now().format(dtf));
+        expiryDateField.setText(LocalDate.now().plusMonths(3).format(dtf));
         feedbackBanner.setText(" ");
     }
 
@@ -410,8 +414,28 @@ public class AddProductPanel extends JPanel {
             return;
         }
 
+        if (arrivalStr.isEmpty()) {
+            showError("Please enter an arrival date (DD-MM-YYYY).");
+            arrivalDateField.requestFocus();
+            return;
+        }
+
+        LocalDateTime parsedArrival = Stock.parseDateTime(arrivalStr);
+        if (parsedArrival == null) {
+            showError("Please enter a valid arrival date format (DD-MM-YYYY).");
+            arrivalDateField.requestFocus();
+            return;
+        }
+
         if (expiryStr.isEmpty()) {
-            showError("Please choose or type an expiry date.");
+            showError("Please choose or type an expiry date (DD-MM-YYYY).");
+            expiryDateField.requestFocus();
+            return;
+        }
+
+        LocalDateTime parsedExpiry = Stock.parseDateTime(expiryStr);
+        if (parsedExpiry == null) {
+            showError("Please enter a valid expiry date format (DD-MM-YYYY).");
             expiryDateField.requestFocus();
             return;
         }
@@ -436,7 +460,7 @@ public class AddProductPanel extends JPanel {
             productId = newProd.getId();
         }
 
-        Stock stock = new Stock(productId, batchNo, quantity, arrivalStr, expiryStr);
+        Stock stock = new Stock(productId, batchNo, quantity, parsedArrival, parsedExpiry);
         if (stock.save()) {
             showSuccess("✓ Added '" + name + "' (Batch " + batchNo + ") successfully!");
             navigator.refreshAll();
@@ -450,7 +474,7 @@ public class AddProductPanel extends JPanel {
                 resetFormDefaults();
             }
         } else {
-            showError("Failed to save stock. Please ensure date format is YYYY-MM-DD.");
+            showError("Failed to save stock. Please ensure date format is DD-MM-YYYY.");
         }
     }
 

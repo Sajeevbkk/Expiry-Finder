@@ -127,14 +127,17 @@ public class StockItemDTO {
         }
     }
 
+    private static final java.time.format.DateTimeFormatter USER_DATE_FORMATTER =
+            java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
     public String getArrivalDateFormatted() {
         if (arrivalDate == null) return "-";
-        return arrivalDate.toLocalDate().toString();
+        return arrivalDate.format(USER_DATE_FORMATTER);
     }
 
     public String getExpiryDateFormatted() {
         if (expiryDate == null) return "-";
-        return expiryDate.toLocalDate().toString();
+        return expiryDate.format(USER_DATE_FORMATTER);
     }
 
     public double getTotalValue() {

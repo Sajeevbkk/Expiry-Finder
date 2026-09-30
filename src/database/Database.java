@@ -57,10 +57,10 @@ public class Database {
                 "    quantity INTEGER NOT NULL," +
                 "    batchno INTEGER NOT NULL," +
                 "    arrival_date TEXT NOT NULL CHECK (" +
-                "        arrival_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'" +
+                "        arrival_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'" +
                 "    )," +
                 "    expiry_date TEXT NOT NULL CHECK (" +
-                "        expiry_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'" +
+                "        expiry_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'" +
                 "    )," +
                 "    FOREIGN KEY (product_id) REFERENCES products(id)" +
                 ");";
@@ -71,6 +71,10 @@ public class Database {
                     stmt.execute(categoriesSql);
                     stmt.execute(productsSql);
                     stmt.execute(stockSql);
+
+                    // Ensure any existing legacy timestamps with time in stock table are cleaned up to date-only
+                    stmt.execute("UPDATE stock SET arrival_date = substr(arrival_date, 1, 10) WHERE length(arrival_date) > 10;");
+                    stmt.execute("UPDATE stock SET expiry_date = substr(expiry_date, 1, 10) WHERE length(expiry_date) > 10;");
                 }
 
                 System.out.println("Database connection established and tables initialized successfully.");
@@ -310,11 +314,20 @@ public class Database {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
+            String arrival = stock.getArrivalDateString();
+            if (arrival != null && arrival.length() > 10) {
+                arrival = arrival.substring(0, 10);
+            }
+            String expiry = stock.getExpiryDateString();
+            if (expiry != null && expiry.length() > 10) {
+                expiry = expiry.substring(0, 10);
+            }
+
             pstmt.setLong(1, stock.getProductID());
             pstmt.setInt(2, stock.getQuantity());
             pstmt.setInt(3, stock.getBatchNo());
-            pstmt.setString(4, stock.getArrivalDateString());
-            pstmt.setString(5, stock.getExpiryDateString());
+            pstmt.setString(4, arrival);
+            pstmt.setString(5, expiry);
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -336,11 +349,20 @@ public class Database {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
+            String arrival = stock.getArrivalDateString();
+            if (arrival != null && arrival.length() > 10) {
+                arrival = arrival.substring(0, 10);
+            }
+            String expiry = stock.getExpiryDateString();
+            if (expiry != null && expiry.length() > 10) {
+                expiry = expiry.substring(0, 10);
+            }
+
             pstmt.setLong(1, stock.getProductID());
             pstmt.setInt(2, stock.getQuantity());
             pstmt.setInt(3, stock.getBatchNo());
-            pstmt.setString(4, stock.getArrivalDateString());
-            pstmt.setString(5, stock.getExpiryDateString());
+            pstmt.setString(4, arrival);
+            pstmt.setString(5, expiry);
             pstmt.setLong(6, stock.getId());
 
             return pstmt.executeUpdate() > 0;
