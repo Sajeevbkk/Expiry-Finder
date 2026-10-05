@@ -13,6 +13,7 @@
 
 # Database files
 db/
+mysql_data/
 
 # Mobile tools for Java (J2ME)
 .mtj.tmp/

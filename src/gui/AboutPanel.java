@@ -19,9 +19,12 @@ public class AboutPanel extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(BorderFactory.createEmptyBorder(20, 36, 20, 36));
 
-        ImageIcon icon = new ImageIcon("src/assets/icon.png");
-        JLabel iconLabel = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(88, 88, Image.SCALE_SMOOTH)));
-        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        ImageIcon icon = UITheme.loadImageIcon("src/assets/icon.png");
+        JLabel iconLabel = null;
+        if (icon.getIconWidth() > 0) {
+            iconLabel = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(88, 88, Image.SCALE_SMOOTH)));
+            iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        }
 
         JLabel title = new JLabel("Expiry Finder", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
@@ -65,13 +68,15 @@ public class AboutPanel extends JPanel {
         metaRow.setMaximumSize(new Dimension(660, 32));
         metaRow.setAlignmentX(Component.CENTER_ALIGNMENT);
         metaRow.add(createBadge("Version 1.0.0"));
-        metaRow.add(createBadge("SQLite Local Storage"));
+        metaRow.add(createBadge("MySQL Database"));
         metaRow.add(createBadge("Offline Ready"));
         metaRow.add(createBadge("Retail Grade"));
 
         card.add(Box.createVerticalGlue());
-        card.add(iconLabel);
-        card.add(Box.createVerticalStrut(14));
+        if (iconLabel != null) {
+            card.add(iconLabel);
+            card.add(Box.createVerticalStrut(14));
+        }
         card.add(title);
         card.add(Box.createVerticalStrut(4));
         card.add(version);

@@ -27,6 +27,7 @@ public class InventoryPanel extends JPanel {
     private List<StockItemDTO> currentList;
 
     private JLabel summaryLabel;
+    private boolean isUpdatingFilters = false;
 
     public InventoryPanel(ViewNavigator navigator) {
         this.navigator = navigator;
@@ -74,13 +75,17 @@ public class InventoryPanel extends JPanel {
         categoryFilterCombo.setPreferredSize(new Dimension(140, 40));
         categoryFilterCombo.setFont(UITheme.FONT_REGULAR);
         categoryFilterCombo.setBackground(Color.WHITE);
-        categoryFilterCombo.addActionListener(e -> applyFilters());
+        categoryFilterCombo.addActionListener(e -> {
+            if (!isUpdatingFilters) applyFilters();
+        });
 
         statusFilterCombo = new JComboBox<>(new String[]{"All Statuses", "Expired Only", "Expiring < 7 Days", "Expiring < 30 Days", "Good"});
         statusFilterCombo.setPreferredSize(new Dimension(140, 40));
         statusFilterCombo.setFont(UITheme.FONT_REGULAR);
         statusFilterCombo.setBackground(Color.WHITE);
-        statusFilterCombo.addActionListener(e -> applyFilters());
+        statusFilterCombo.addActionListener(e -> {
+            if (!isUpdatingFilters) applyFilters();
+        });
 
         ModernButton refreshBtn = new ModernButton("Refresh", new VectorIcon(VectorIcon.Type.REFRESH, 13), ModernButton.Variant.GHOST, 12);
         refreshBtn.setPreferredSize(new Dimension(115, 40));
@@ -176,11 +181,16 @@ public class InventoryPanel extends JPanel {
     }
 
     public void loadCategories() {
-        categoryFilterCombo.removeAllItems();
-        categoryFilterCombo.addItem("All Categories");
-        List<Category> categories = Database.getAllCategories();
-        for (Category c : categories) {
-            categoryFilterCombo.addItem(c.getName());
+        isUpdatingFilters = true;
+        try {
+            categoryFilterCombo.removeAllItems();
+            categoryFilterCombo.addItem("All Categories");
+            List<Category> categories = Database.getAllCategories();
+            for (Category c : categories) {
+                categoryFilterCombo.addItem(c.getName());
+            }
+        } finally {
+            isUpdatingFilters = false;
         }
     }
 
@@ -250,6 +260,10 @@ public class InventoryPanel extends JPanel {
             return;
         }
 
+        if (currentList == null || selectedRow >= currentList.size()) {
+            return;
+        }
+
         StockItemDTO item = currentList.get(selectedRow);
         String input = JOptionPane.showInputDialog(this,
                 "Enter updated quantity for " + item.getProductName() + " (Batch #" + item.getBatchNo() + "):",
@@ -277,6 +291,10 @@ public class InventoryPanel extends JPanel {
         int selectedRow = inventoryTable.getSelectedRow();
         if (selectedRow < 0) {
             JOptionPane.showMessageDialog(this, "Please select a product batch from the table to remove.", "Select Batch", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (currentList == null || selectedRow >= currentList.size()) {
             return;
         }
 

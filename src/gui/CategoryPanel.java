@@ -187,6 +187,10 @@ public class CategoryPanel extends JPanel {
             return;
         }
 
+        if (currentCategories == null || row >= currentCategories.size()) {
+            return;
+        }
+
         Category selected = currentCategories.get(row);
         String newName = JOptionPane.showInputDialog(this, "Enter new name for category:", selected.getName());
         if (newName != null && !newName.trim().isEmpty() && !newName.trim().equalsIgnoreCase(selected.getName())) {
@@ -203,6 +207,10 @@ public class CategoryPanel extends JPanel {
         int row = categoryTable.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(this, "Please select a category to delete.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (currentCategories == null || row >= currentCategories.size()) {
             return;
         }
 

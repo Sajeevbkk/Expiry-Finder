@@ -15,11 +15,11 @@ public class App extends JFrame implements ViewNavigator {
     private final AboutPanel aboutPanel;
 
     public App() {
-        ImageIcon icon = new ImageIcon("src/assets/icon.png");
+        ImageIcon icon = UITheme.loadImageIcon("src/assets/icon.png");
 
         /*---------------- Initial Configurations -----------------*/
         setTitle("Expiry Finder - Smart Stock & Expiry Manager");
-        if (icon.getImage() != null) {
+        if (icon.getImage() != null && icon.getIconWidth() > 0) {
             setIconImage(icon.getImage());
         }
         setMinimumSize(new Dimension(1080, 700));
@@ -55,6 +55,18 @@ public class App extends JFrame implements ViewNavigator {
         navigateTo("INVENTORY");
 
         setVisible(true);
+
+        if (!database.Database.isConnected()) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(this,
+                        "Could not connect to the MySQL database at " + database.Database.getHost() + ":" + database.Database.getPort() + ".\n\n" +
+                        "Please verify that:\n" +
+                        "1. MySQL Server is running.\n" +
+                        "2. Settings in 'db.properties' (host, port, user, password) are correct.\n" +
+                        "3. The database user has necessary permissions.",
+                        "Database Connection Notice", JOptionPane.WARNING_MESSAGE);
+            });
+        }
     }
 
     @Override

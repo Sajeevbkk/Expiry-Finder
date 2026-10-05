@@ -357,13 +357,13 @@ public class AddProductPanel extends JPanel {
         expiryDateField.setText(LocalDate.now().plusMonths(3).format(dtf));
         batchField.setText(String.valueOf((int) (System.currentTimeMillis() % 100000)));
         quantityField.setText("20");
-        priceField.setText("2.99");
+        priceField.setText("50.00");
     }
 
     private void clearForm() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         nameField.setText("");
-        priceField.setText("2.99");
+        priceField.setText("50.00");
         batchField.setText(String.valueOf((int) (System.currentTimeMillis() % 100000)));
         quantityField.setText("20");
         arrivalDateField.setText(LocalDate.now().format(dtf));

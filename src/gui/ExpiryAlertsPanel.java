@@ -205,6 +205,10 @@ public class ExpiryAlertsPanel extends JPanel {
             return;
         }
 
+        if (currentList == null || selectedRow >= currentList.size()) {
+            return;
+        }
+
         StockItemDTO item = currentList.get(selectedRow);
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Write Off Batch Confirmation\n\n" +

@@ -58,10 +58,10 @@ public class StatusBadgeRenderer extends DefaultTableCellRenderer {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            int pillW = 120;
-            int pillH = 26;
-            int x = (getWidth() - pillW) / 2;
-            int y = (getHeight() - pillH) / 2;
+            int pillW = Math.min(120, Math.max(30, getWidth() - 8));
+            int pillH = Math.min(26, Math.max(16, getHeight() - 4));
+            int x = Math.max(0, (getWidth() - pillW) / 2);
+            int y = Math.max(0, (getHeight() - pillH) / 2);
 
             // Fill pill
             g2.setColor(bgColor);

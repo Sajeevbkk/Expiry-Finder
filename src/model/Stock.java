@@ -96,6 +96,11 @@ public class Stock {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d/M/yyyy");
                 return LocalDate.parse(dateStr, dtf).atStartOfDay();
             }
+            // User format with dots: dd.MM.yyyy (e.g. 30.09.2026 or 5.9.2026)
+            if (dateStr.matches("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$")) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("d.M.yyyy");
+                return LocalDate.parse(dateStr, dtf).atStartOfDay();
+            }
             // ISO date format: yyyy-MM-dd
             if (dateStr.matches("^\\d{4}-\\d{1,2}-\\d{1,2}$")) {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-M-d");

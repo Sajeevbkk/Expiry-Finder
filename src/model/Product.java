@@ -85,6 +85,9 @@ public class Product {
 
     @Override
     public String toString() {
-        return name + " (ID: " + id + ", Price: " + price + ", Category ID: " + categoryID + ")";
+        if (categoryName != null && !categoryName.isEmpty()) {
+            return name + " (₹" + String.format("%.2f", price) + " • " + categoryName + ")";
+        }
+        return name + " (₹" + String.format("%.2f", price) + ")";
     }
 }

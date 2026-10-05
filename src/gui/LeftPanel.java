@@ -11,8 +11,8 @@ public class LeftPanel extends JPanel {
     private final NavBar navBar;
 
     public LeftPanel(ViewNavigator navigator) {
-        ImageIcon topImage = new ImageIcon("src/assets/labelicon.png");
-        ImageIcon bottomImage = new ImageIcon("src/assets/products.png");
+        ImageIcon topImage = UITheme.loadImageIcon("src/assets/labelicon.png");
+        ImageIcon bottomImage = UITheme.loadImageIcon("src/assets/products.png");
 
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(280, 100));
@@ -24,9 +24,12 @@ public class LeftPanel extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 0));
         topPanel.setBackground(UITheme.SIDEBAR_BG);
 
-        JLabel topPanelIcon = new JLabel(new ImageIcon(
-                topImage.getImage().getScaledInstance(62, 62, Image.SCALE_SMOOTH)
-        ));
+        if (topImage.getIconWidth() > 0) {
+            JLabel topPanelIcon = new JLabel(new ImageIcon(
+                    topImage.getImage().getScaledInstance(62, 62, Image.SCALE_SMOOTH)
+            ));
+            topPanel.add(topPanelIcon, BorderLayout.WEST);
+        }
 
         JPanel subTopPanel = new JPanel(new GridLayout(2, 1, 0, 0));
         subTopPanel.setBorder(BorderFactory.createEmptyBorder(18, 16, 18, 0));
@@ -43,21 +46,22 @@ public class LeftPanel extends JPanel {
         subTopPanel.add(labelExpiry);
         subTopPanel.add(labelFinder);
 
-        topPanel.add(topPanelIcon, BorderLayout.WEST);
         topPanel.add(subTopPanel, BorderLayout.CENTER);
 
         // --- Navigation Buttons (Custom Vector Icons, No missing character boxes) ---
         navBar = new NavBar(navigator);
 
         // --- Bottom Illustration ---
-        JLabel bottom = new JLabel(new ImageIcon(
-                bottomImage.getImage().getScaledInstance(280, 200, Image.SCALE_SMOOTH)
-        ));
-        bottom.setPreferredSize(new Dimension(280, 200));
+        if (bottomImage.getIconWidth() > 0) {
+            JLabel bottom = new JLabel(new ImageIcon(
+                    bottomImage.getImage().getScaledInstance(280, 200, Image.SCALE_SMOOTH)
+            ));
+            bottom.setPreferredSize(new Dimension(280, 200));
+            add(bottom, BorderLayout.SOUTH);
+        }
 
         add(topPanel, BorderLayout.NORTH);
         add(navBar, BorderLayout.CENTER);
-        add(bottom, BorderLayout.SOUTH);
     }
 
     public void setActiveView(String viewName) {

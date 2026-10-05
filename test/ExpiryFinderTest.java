@@ -185,6 +185,13 @@ public class ExpiryFinderTest {
         assertEquals(12, dtSlashes.getMonthValue());
         assertEquals(25, dtSlashes.getDayOfMonth());
 
+        // Test user format with dots: dd.MM.yyyy
+        LocalDateTime dtDots = Stock.parseDateTime("15.10.2026");
+        assertNotNull(dtDots);
+        assertEquals(2026, dtDots.getYear());
+        assertEquals(10, dtDots.getMonthValue());
+        assertEquals(15, dtDots.getDayOfMonth());
+
         LocalDateTime dt2 = Stock.parseDateTime("2026-12-31 23:59:59");
         assertNotNull(dt2);
         assertEquals(23, dt2.getHour());

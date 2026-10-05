@@ -92,4 +92,42 @@ public class UITheme {
         header.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(0xE2E8F0)));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(SwingConstants.LEFT);
     }
+
+    /**
+     * Safely loads an ImageIcon from classpath resources or file paths.
+     */
+    public static ImageIcon loadImageIcon(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return new ImageIcon();
+        }
+
+        // 1. Try classpath resource
+        String resPath = path;
+        if (resPath.startsWith("src/")) {
+            resPath = resPath.substring(3);
+        }
+        if (!resPath.startsWith("/")) {
+            resPath = "/" + resPath;
+        }
+        java.net.URL url = UITheme.class.getResource(resPath);
+        if (url != null) {
+            return new ImageIcon(url);
+        }
+
+        // 2. Try file system directly
+        java.io.File file = new java.io.File(path);
+        if (file.exists()) {
+            return new ImageIcon(file.getAbsolutePath());
+        }
+
+        // 3. Try with "src/" prefix
+        if (!path.startsWith("src/")) {
+            java.io.File srcFile = new java.io.File("src/" + path);
+            if (srcFile.exists()) {
+                return new ImageIcon(srcFile.getAbsolutePath());
+            }
+        }
+
+        return new ImageIcon();
+    }
 }

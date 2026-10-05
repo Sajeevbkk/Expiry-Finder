@@ -13,16 +13,36 @@ A simple Java application to help shops manage product expiry dates efficiently.
 
 ## 🛠️ Technology Stack
 
-- **Java** - Core language
+- **Java 17** - Core language
 - **Maven** - Build and dependency management
 - **JDBC** - Database connectivity
-- **SQLite/MySQL** - Data persistence
+- **MySQL 8.0+** - Relational data persistence
+- **Swing** - Modern desktop user interface
 
 ## 📋 Prerequisites
 
-- Java JDK 11 or higher
+- Java JDK 17 or higher
 - Maven 3.6 or higher
+- MySQL Server 8.0+ (or MariaDB / XAMPP / WampServer)
 - Git (optional, for cloning)
+
+## ⚙️ Database Configuration
+
+Configuration is located in `db.properties` (in project root):
+
+```properties
+db.host=localhost
+db.port=3306
+db.name=expiry_finder
+db.user=root
+db.password=
+```
+
+> **Note:** The application automatically creates the `expiry_finder` database and required tables (`categories`, `products`, `stock`) on first run if your user has database creation privileges.
+> Alternatively, you can import `sql/setup_mysql.sql` using MySQL Workbench, phpMyAdmin, or MySQL CLI:
+> ```bash
+> mysql -u root -p < sql/setup_mysql.sql
+> ```
 
 ## 🚀 Getting Started
 
@@ -37,7 +57,12 @@ cd Expiry-Finder
 mvn clean compile
 ```
 
-### 3. Run the Application
+### 3. Run Tests
+```bash
+mvn test
+```
+
+### 4. Run the Application
 ```bash
 mvn exec:java
 ```
